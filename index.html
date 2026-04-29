@@ -37,16 +37,18 @@
   .bookmark-context-menu { background: var(--bg2) !important; }
   .bookmark-context-menu button { color: var(--text3) !important; }
 
-  /* ✅ Requirement 1: Universal Grayscale CSS Security Filter for ALL bookmark icons */
-  
-
-  /* ✅ Requirement 3: Search result highlight — Blue Glow border/shadow, icons stay grayscale */
+  /* ✅ Requirement 3: Search result highlight — Blue Glow border/shadow */
   .bookmark-card.search-match {
     border: 2px solid #6366f1 !important;
     box-shadow: 0 0 0 4px rgba(99,102,241,0.18), 0 8px 24px rgba(99,102,241,0.15) !important;
   }
-  /* Icons remain grayscale even on search match hover */
-  
+
+  /* ✅ Locked bookmark in search — amber glow */
+  .bookmark-card.search-match.bm-locked {
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 0 0 4px rgba(245,158,11,0.18), 0 8px 24px rgba(245,158,11,0.15) !important;
+  }
+
   .sticky-header {
     position: sticky; top: 0; z-index: 100;
     background: var(--bg); padding: 16px 24px 0;
@@ -122,6 +124,17 @@
   .bookmark-card.dragging { opacity: 0.4; border: 2px dashed #6366f1; }
   .bookmark-card.drag-over { border-left: 5px solid #6366f1; }
 
+  /* ✅ Locked bookmark card style */
+  .bookmark-card.bm-locked {
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.18) !important;
+  }
+  .bookmark-card.bm-locked .bookmark-icon { filter: grayscale(1) brightness(0.8); }
+  .bm-lock-badge {
+    position: absolute; top: 6px; left: 8px;
+    font-size: 13px; color: #f59e0b;
+  }
+
   .bookmark-icon {
     width: 46px; height: 46px; border-radius: 12px; background: #f8fafc;
     display: flex; justify-content: center; align-items: center; overflow: hidden;
@@ -137,6 +150,10 @@
   }
   .bookmark-card:hover .bookmark-name { color: #4f46e5; }
 
+  /* ✅ Locked bookmark name stays amber colored */
+  .bookmark-card.bm-locked .bookmark-name { color: #d97706 !important; }
+  .bookmark-card.bm-locked:hover .bookmark-name { color: #b45309 !important; }
+
   .bookmark-context-menu {
     position: absolute; top: 8px; right: 10px; display: flex; gap: 6px;
     background: rgba(255,255,255,0.98); border-radius: 10px;
@@ -149,6 +166,46 @@
     cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.2s ease;
   }
   .bookmark-context-menu button:hover { background: #f3f4f6; color: #374151; }
+  .bookmark-context-menu button.btn-lock-bm { color: #f59e0b !important; }
+  .bookmark-context-menu button.btn-lock-bm:hover { background: #fef3c7 !important; color: #d97706 !important; }
+  .bookmark-context-menu button.btn-unlock-bm { color: #10b981 !important; }
+  .bookmark-context-menu button.btn-unlock-bm:hover { background: #d1fae5 !important; color: #059669 !important; }
+
+  /* ✅ Bookmark unlock modal */
+  #bmUnlockModal { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(17,24,39,0.55); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(3px); }
+  #bmUnlockModal.show { display:flex; }
+  #bmUnlockBox {
+    background: var(--bg); border-radius: 18px; padding: 32px 28px; max-width: 360px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+  }
+  #bmUnlockBox .bm-lock-big { width: 72px; height: 72px; background: #fef3c7; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+  #bmUnlockBox h3 { margin:0; font-size:1.2rem; color: var(--text2); }
+  #bmUnlockBox p { margin:0; font-size:0.9rem; color: var(--text3); }
+  #bmUnlockBox input { width:100%; padding:11px 16px; border:1.5px solid #d1d5db; border-radius:0.6rem; font-size:1rem; outline:none; background: var(--bg2); color: var(--text2); user-select:text; }
+  #bmUnlockBox input:focus { border-color:#6366f1; }
+  #bmUnlockBox .bm-unlock-btns { display:flex; gap:10px; width:100%; }
+  #bmUnlockBox .bm-unlock-btns button { flex:1; padding:11px; border-radius:0.6rem; font-size:0.95rem; font-weight:600; border:none; cursor:pointer; }
+  #bmUnlockCancelBtn { background: #f3f4f6; color: #374151 !important; }
+  #bmUnlockGoBtn { background: #6366f1; color: #fff !important; }
+  #bmUnlockErr { color: #ef4444; font-size: 0.82rem; display:none; }
+
+  /* ✅ Delete confirm modal for locked bookmarks */
+  #bmDeleteModal { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(17,24,39,0.55); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(3px); }
+  #bmDeleteModal.show { display:flex; }
+  #bmDeleteBox {
+    background: var(--bg); border-radius: 18px; padding: 32px 28px; max-width: 360px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+  }
+  #bmDeleteBox .bm-del-icon { width: 72px; height: 72px; background: #fee2e2; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+  #bmDeleteBox h3 { margin:0; font-size:1.2rem; color: var(--text2); }
+  #bmDeleteBox p { margin:0; font-size:0.9rem; color: var(--text3); }
+  #bmDeleteBox input { width:100%; padding:11px 16px; border:1.5px solid #d1d5db; border-radius:0.6rem; font-size:1rem; outline:none; background: var(--bg2); color: var(--text2); user-select:text; }
+  #bmDeleteBox input:focus { border-color:#ef4444; }
+  #bmDeleteBox .bm-del-btns { display:flex; gap:10px; width:100%; }
+  #bmDeleteBox .bm-del-btns button { flex:1; padding:11px; border-radius:0.6rem; font-size:0.95rem; font-weight:600; border:none; cursor:pointer; }
+  #bmDeleteCancelBtn { background: #f3f4f6; color: #374151 !important; }
+  #bmDeleteConfirmBtn { background: #ef4444; color: #fff !important; }
+  #bmDeleteErr { color: #ef4444; font-size: 0.82rem; display:none; }
 
   .tab-locked-screen {
     grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center;
@@ -274,6 +331,36 @@
 
 <div id="tabContextMenu"></div>
 
+<!-- ✅ Bookmark Card Unlock Modal -->
+<div id="bmUnlockModal">
+  <div id="bmUnlockBox">
+    <div class="bm-lock-big"><span class="material-icons" style="font-size:36px;color:#f59e0b;">lock</span></div>
+    <h3>🔒 Bookmark Locked</h3>
+    <p id="bmUnlockDesc">Yeh bookmark password se protected hai</p>
+    <input type="password" id="bmUnlockInp" placeholder="Password dalein..." />
+    <div id="bmUnlockErr">❌ Wrong password, dobara try karein!</div>
+    <div class="bm-unlock-btns">
+      <button id="bmUnlockCancelBtn">Cancel</button>
+      <button id="bmUnlockGoBtn">Unlock &amp; Open</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ NEW: Locked Bookmark Delete Confirm Modal -->
+<div id="bmDeleteModal">
+  <div id="bmDeleteBox">
+    <div class="bm-del-icon"><span class="material-icons" style="font-size:36px;color:#ef4444;">delete_forever</span></div>
+    <h3>🗑️ Delete Locked Bookmark</h3>
+    <p id="bmDeleteDesc">Delete karne ke liye password dalein</p>
+    <input type="password" id="bmDeleteInp" placeholder="Password dalein..." />
+    <div id="bmDeleteErr">❌ Wrong password! Delete nahi hua.</div>
+    <div class="bm-del-btns">
+      <button id="bmDeleteCancelBtn">Cancel</button>
+      <button id="bmDeleteConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
 <div id="aiBrainDrawer" class="ai-brain-drawer">
   <div class="ai-brain-header">
     <div style="display:flex;align-items:center;gap:8px;"><span class="material-icons">psychology</span><strong>AI Brain</strong></div>
@@ -346,6 +433,7 @@
   let editingBookmarkId = null;
   let draggedItemIndex = null;
   let unlockedTabs = new Set();
+  let unlockedBookmarks = new Set();
 
   const uid = () => Math.random().toString(36).substr(2,9);
 
@@ -354,7 +442,8 @@
       const d = new URL(url).hostname.toLowerCase();
       if(d.includes('mail.google.com') || d.includes('gmail.com')) return 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico';
       if(d.includes('whatsapp.com')) return 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg';
-if(d.includes('deepseek.com')) return 'https://vectorseek.com/wp-content/uploads/2025/01/Deepseek-Chat-App-Icon-PNG-Vector.png';      if(d.includes('onepilottools.com')) return 'https://cdn-icons-png.flaticon.com/512/5109/5109515.png';
+      if(d.includes('deepseek.com')) return 'https://vectorseek.com/wp-content/uploads/2025/01/Deepseek-Chat-App-Icon-PNG-Vector.png';
+      if(d.includes('onepilottools.com')) return 'https://cdn-icons-png.flaticon.com/512/5109/5109515.png';
       return `https://icon.horse/icon/${d}`;
     } catch { return 'https://via.placeholder.com/32'; }
   }
@@ -526,38 +615,176 @@ if(d.includes('deepseek.com')) return 'https://vectorseek.com/wp-content/uploads
 
     list.forEach((bm,idx) => {
       const card = document.createElement('article');
-      // ✅ Requirement 3: Add 'search-match' class when searching so icons stay grayscale + blue glow applied
-      card.className = 'bookmark-card' + (isSearching ? ' search-match' : '');
-      card.draggable = true;
-      card.innerHTML=`
+      const isLocked = !!bm.bmPassword && !unlockedBookmarks.has(bm.id);
+      card.className = 'bookmark-card' + (isSearching ? ' search-match' : '') + (isLocked ? ' bm-locked' : '');
+      card.draggable = !isLocked; // ✅ Locked bookmarks cannot be dragged
+
+      const lockBadge = isLocked ? `<span class="material-icons bm-lock-badge" title="Locked">lock</span>` : '';
+
+      let lockBtn = '';
+      if(!bm.bmPassword) {
+        lockBtn = `<button class="material-icons btn-lock-bm" data-action="bm-lock" title="Lock this bookmark">lock</button>`;
+      } else if(isLocked) {
+        lockBtn = `<button class="material-icons btn-unlock-bm" data-action="bm-unlock" title="Unlock bookmark">lock_open</button>
+                   <button class="material-icons" data-action="bm-remove-password" title="Remove password" style="color:#ef4444!important;">no_encryption</button>`;
+      } else {
+        lockBtn = `<button class="material-icons" data-action="bm-remove-password" title="Remove password" style="color:#ef4444!important;">no_encryption</button>`;
+      }
+
+      // ✅ FIX: If locked, hide edit & delete buttons — only show unlock/remove-password
+      const editDeleteBtns = isLocked
+        ? '' // locked cards: no edit, no delete visible in context menu
+        : `<button class="material-icons" data-action="edit">edit</button>
+           <button class="material-icons" data-action="delete">delete</button>`;
+
+      // ✅ For locked cards, show a password-protected delete button separately
+      const lockedDeleteBtn = isLocked
+        ? `<button class="material-icons" data-action="bm-locked-delete" title="Delete (requires password)" style="color:#ef4444!important;">delete</button>`
+        : '';
+
+      card.innerHTML = lockBadge + `
         <div class="bookmark-icon"><img src="${getFavicon(bm.url)}" /></div>
         <div class="bookmark-name">${bm.name}</div>
         <div class="bookmark-context-menu">
-          <button class="material-icons" data-action="edit">edit</button>
-          <button class="material-icons" data-action="delete">delete</button>
+          ${editDeleteBtns}
+          ${lockBtn}
+          ${lockedDeleteBtn}
         </div>`;
 
-      card.onclick = e => { if(!e.target.closest('.bookmark-context-menu')) window.open(bm.url,'_self'); };
-      card.oncontextmenu = e => { e.preventDefault(); document.querySelectorAll('.bookmark-card').forEach(c=>c.classList.remove('show-context-menu')); card.classList.add('show-context-menu'); };
-      card.ondragstart = e => { draggedItemIndex=idx; card.classList.add('dragging'); e.dataTransfer.setData('bookmark-cross-tab',bm.id); e.dataTransfer.effectAllowed='move'; };
-      card.ondragover = e => e.preventDefault();
-      card.ondrop = () => {
-        if(term) return;
-        if(draggedItemIndex!==null && draggedItemIndex!==idx) {
-          const bms=appData.tabs.find(t=>t.id===activeTabId).bookmarks;
-          const [item]=bms.splice(draggedItemIndex,1); bms.splice(idx,0,item);
-          saveData(); renderUI();
+      // ✅ FIX: Card click — locked card always shows unlock modal, never opens URL directly
+      card.onclick = e => {
+        if(e.target.closest('.bookmark-context-menu')) return;
+        if(isLocked) {
+          openBmUnlockModal(bm);
+        } else {
+          window.open(bm.url,'_self');
         }
       };
-      card.ondragend = () => card.classList.remove('dragging');
-      card.querySelector('.bookmark-context-menu').onclick = e => {
-        const action=e.target.getAttribute('data-action');
-        const tTab=appData.tabs.find(t=>t.id===bm.tabId);
-        if(action==='delete'){ tTab.bookmarks=tTab.bookmarks.filter(b=>b.id!==bm.id); saveData(); renderUI(); }
-        if(action==='edit'){ editingBookmarkId=bm.id; document.getElementById('modalBookmarkName').value=bm.name; document.getElementById('modalBookmarkUrl').value=bm.url; document.getElementById('modalBackdrop').classList.add('show'); }
+
+      card.oncontextmenu = e => {
+        e.preventDefault();
+        document.querySelectorAll('.bookmark-card').forEach(c=>c.classList.remove('show-context-menu'));
+        card.classList.add('show-context-menu');
       };
+
+      // ✅ FIX: Only allow drag if bookmark is NOT locked
+      if(!isLocked) {
+        card.ondragstart = e => { draggedItemIndex=idx; card.classList.add('dragging'); e.dataTransfer.setData('bookmark-cross-tab',bm.id); e.dataTransfer.effectAllowed='move'; };
+        card.ondragover = e => e.preventDefault();
+        card.ondrop = () => {
+          if(term) return;
+          if(draggedItemIndex!==null && draggedItemIndex!==idx) {
+            const bms=appData.tabs.find(t=>t.id===activeTabId).bookmarks;
+            const [item]=bms.splice(draggedItemIndex,1); bms.splice(idx,0,item);
+            saveData(); renderUI();
+          }
+        };
+        card.ondragend = () => card.classList.remove('dragging');
+      }
+
+      card.querySelector('.bookmark-context-menu').onclick = e => {
+        const action = e.target.getAttribute('data-action');
+        const tTab = appData.tabs.find(t=>t.id===bm.tabId);
+        const bmObj = tTab ? tTab.bookmarks.find(b=>b.id===bm.id) : null;
+
+        if(action==='delete') {
+          // Normal (unlocked) delete — straight away
+          if(tTab) tTab.bookmarks=tTab.bookmarks.filter(b=>b.id!==bm.id);
+          saveData(); renderUI();
+        }
+
+        // ✅ NEW: Locked bookmark delete — requires password
+        if(action==='bm-locked-delete') {
+          openBmDeleteModal(bm);
+        }
+
+        if(action==='edit') {
+          editingBookmarkId=bm.id;
+          document.getElementById('modalBookmarkName').value=bm.name;
+          document.getElementById('modalBookmarkUrl').value=bm.url;
+          document.getElementById('modalBackdrop').classList.add('show');
+        }
+        if(action==='bm-lock') {
+          const pw = prompt(`"${bm.name}" ke liye password set karein:`);
+          if(pw && pw.trim()) {
+            if(bmObj) { bmObj.bmPassword = btoa(pw); unlockedBookmarks.delete(bm.id); }
+            saveData(); renderUI();
+          }
+        }
+        if(action==='bm-unlock') {
+          openBmUnlockModal(bm);
+        }
+        if(action==='bm-remove-password') {
+          const pw = prompt('Current password dalein password remove karne ke liye:');
+          if(pw === null) return;
+          if(bmObj && btoa(pw) === bmObj.bmPassword) {
+            delete bmObj.bmPassword;
+            unlockedBookmarks.delete(bm.id);
+            saveData(); renderUI();
+          } else {
+            alert('❌ Wrong password! Password remove nahi hua.');
+          }
+        }
+      };
+
       grid.appendChild(card);
     });
+  }
+
+  // ✅ Open bookmark unlock modal (click to open site after password)
+  function openBmUnlockModal(bm) {
+    const modal = document.getElementById('bmUnlockModal');
+    const inp = document.getElementById('bmUnlockInp');
+    const err = document.getElementById('bmUnlockErr');
+    const desc = document.getElementById('bmUnlockDesc');
+    desc.textContent = `"${bm.name}" password se protected hai`;
+    inp.value = ''; err.style.display = 'none';
+    modal.classList.add('show');
+    setTimeout(()=>inp.focus(), 100);
+
+    const doUnlock = () => {
+      if(btoa(inp.value) === bm.bmPassword) {
+        unlockedBookmarks.add(bm.id);
+        modal.classList.remove('show');
+        renderUI();
+        window.open(bm.url, '_self');
+      } else {
+        err.style.display = 'block';
+        inp.value = ''; inp.focus();
+      }
+    };
+
+    document.getElementById('bmUnlockGoBtn').onclick = doUnlock;
+    document.getElementById('bmUnlockCancelBtn').onclick = () => modal.classList.remove('show');
+    inp.onkeydown = e => { if(e.key==='Enter') doUnlock(); };
+  }
+
+  // ✅ NEW: Open delete confirm modal for locked bookmarks
+  function openBmDeleteModal(bm) {
+    const modal = document.getElementById('bmDeleteModal');
+    const inp = document.getElementById('bmDeleteInp');
+    const err = document.getElementById('bmDeleteErr');
+    const desc = document.getElementById('bmDeleteDesc');
+    desc.textContent = `"${bm.name}" delete karne ke liye password dalein`;
+    inp.value = ''; err.style.display = 'none';
+    modal.classList.add('show');
+    setTimeout(()=>inp.focus(), 100);
+
+    const doDelete = () => {
+      if(btoa(inp.value) === bm.bmPassword) {
+        modal.classList.remove('show');
+        appData.tabs.forEach(t => { t.bookmarks = t.bookmarks.filter(b => b.id !== bm.id); });
+        unlockedBookmarks.delete(bm.id);
+        saveData(); renderUI();
+      } else {
+        err.style.display = 'block';
+        inp.value = ''; inp.focus();
+      }
+    };
+
+    document.getElementById('bmDeleteConfirmBtn').onclick = doDelete;
+    document.getElementById('bmDeleteCancelBtn').onclick = () => modal.classList.remove('show');
+    inp.onkeydown = e => { if(e.key==='Enter') doDelete(); };
   }
 
   function openTabMenu(tabId, x, y) {
@@ -612,22 +839,23 @@ if(d.includes('deepseek.com')) return 'https://vectorseek.com/wp-content/uploads
   function moveBookmarkToTab(bmId, targetTabId) {
     let bm=null, srcTab=null;
     appData.tabs.forEach(t=>{ const f=t.bookmarks.find(b=>b.id===bmId); if(f){bm=f;srcTab=t;} });
+    // ✅ FIX: Locked bookmarks cannot be moved to another tab
     if(!bm||!srcTab||srcTab.id===targetTabId) return;
+    if(bm.bmPassword && !unlockedBookmarks.has(bm.id)) return;
     srcTab.bookmarks=srcTab.bookmarks.filter(b=>b.id!==bmId);
     appData.tabs.find(t=>t.id===targetTabId)?.bookmarks.push(bm);
     saveData(); renderUI();
   }
 
   // Security
-  // Security
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', e => {
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
     if(e.keyCode===123){e.preventDefault();return false;}
     if(e.ctrlKey&&e.shiftKey&&(e.keyCode===73||e.keyCode===74)){e.preventDefault();return false;}
     if(e.ctrlKey&&e.keyCode===85){e.preventDefault();return false;}
     if(e.ctrlKey&&e.keyCode===83){e.preventDefault();return false;}
-});
-console.log("%cStop!", "color:red; font-size:40px; font-weight:bold;");
+  });
+  console.log("%cStop!", "color:red; font-size:40px; font-weight:bold;");
   console.log("%cBahi, yahan se code copy karna mana hai!", "color:orange; font-size:16px;");
 
   const nInp=document.getElementById('bookmarkNameInput');
@@ -641,12 +869,24 @@ console.log("%cStop!", "color:red; font-size:40px; font-weight:bold;");
     nInp.value=''; uInp.value=''; saveData(); renderUI();
   };
 
+  // ✅ FIX: Search Enter — blocked for locked bookmarks, shows unlock modal instead
   document.getElementById('searchInput').onkeydown=e=>{
     if(e.key==='Enter'){
       const val=e.target.value.toLowerCase();
       let found=null;
-      appData.tabs.forEach(t=>{ if(t.password && !unlockedTabs.has(t.id)) return; const b=t.bookmarks.find(x=>x.name.toLowerCase().includes(val)); if(b) found=b; });
-      if(found) window.open(found.url,'_self');
+      appData.tabs.forEach(t=>{
+        if(t.password && !unlockedTabs.has(t.id)) return;
+        const b=t.bookmarks.find(x=>x.name.toLowerCase().includes(val));
+        if(b) found=b;
+      });
+      if(found) {
+        // ✅ If bookmark is locked, show unlock modal instead of opening
+        if(found.bmPassword && !unlockedBookmarks.has(found.id)) {
+          openBmUnlockModal(found);
+        } else {
+          window.open(found.url,'_self');
+        }
+      }
     }
   };
 
@@ -672,6 +912,9 @@ console.log("%cStop!", "color:red; font-size:40px; font-weight:bold;");
   document.addEventListener('click',e=>{if(!e.target.closest('.bookmark-card'))document.querySelectorAll('.bookmark-card').forEach(c=>c.classList.remove('show-context-menu'));});
 
   loadData();
+
+  // Export openBmUnlockModal so search handler can use it
+  window._openBmUnlockModal = openBmUnlockModal;
 })();
 
 function dismissBackupReminder() {
