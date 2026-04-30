@@ -207,6 +207,33 @@
   #bmDeleteConfirmBtn { background: #ef4444; color: #fff !important; }
   #bmDeleteErr { color: #ef4444; font-size: 0.82rem; display:none; }
 
+  /* ✅ NEW: Locked Cards Warning Modal (tab delete block) */
+  #tabLockedWarningModal { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(17,24,39,0.6); z-index:99999; justify-content:center; align-items:center; backdrop-filter:blur(4px); }
+  #tabLockedWarningModal.show { display:flex; }
+  #tabLockedWarningBox {
+    background: var(--bg); border-radius: 20px; padding: 36px 30px; max-width: 400px; width: 100%;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.25); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;
+    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes popIn { from { opacity:0; transform:scale(0.82) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  #tabLockedWarningBox .tlw-icon { width: 80px; height: 80px; background: linear-gradient(135deg,#fef3c7,#fde68a); border-radius: 50%; display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 20px rgba(245,158,11,0.3); }
+  #tabLockedWarningBox h3 { margin:0; font-size:1.25rem; color: var(--text2); font-weight:700; }
+  #tabLockedWarningBox p { margin:0; font-size:0.92rem; color: var(--text3); line-height:1.6; }
+  #tabLockedWarningBox .tlw-locked-list {
+    background: linear-gradient(135deg,#fef9ee,#fffbf0); border: 1.5px solid #fcd34d; border-radius: 12px;
+    padding: 12px 16px; width: 100%; font-size: 0.88rem; color: #92400e; text-align:left;
+    display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto;
+  }
+  #tabLockedWarningBox .tlw-locked-list .tlw-bm-item { display:flex; align-items:center; gap:8px; font-weight:600; }
+  #tabLockedWarningBox .tlw-locked-list .tlw-bm-item span { font-size:16px; color:#f59e0b; }
+  #tabLockedWarningBox .tlw-ok-btn {
+    background: linear-gradient(135deg,#f59e0b,#fbbf24); color: #fff; border:none;
+    border-radius: 12px; padding: 13px 40px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(245,158,11,0.35); transition: 0.2s;
+    width: 100%;
+  }
+  #tabLockedWarningBox .tlw-ok-btn:hover { transform:translateY(-2px); box-shadow: 0 8px 22px rgba(245,158,11,0.45); }
+
   .tab-locked-screen {
     grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center;
     justify-content: center; padding: 60px 20px; gap: 14px; text-align: center;
@@ -358,6 +385,19 @@
       <button id="bmDeleteCancelBtn">Cancel</button>
       <button id="bmDeleteConfirmBtn">Delete</button>
     </div>
+  </div>
+</div>
+
+<!-- ✅ NEW: Tab Delete Blocked — Locked Cards Warning Modal -->
+<div id="tabLockedWarningModal">
+  <div id="tabLockedWarningBox">
+    <div class="tlw-icon">
+      <span class="material-icons" style="font-size:40px;color:#f59e0b;">lock</span>
+    </div>
+    <h3>🚫 Tab Delete Nahi Ho Sakta!</h3>
+    <p>Is tab mein <strong id="tlwLockedCount">kuch</strong> locked bookmark(s) hain.<br>Pehle in sab cards ko <strong>unlock</strong> karein, phir tab delete karein.</p>
+    <div class="tlw-locked-list" id="tlwLockedList"></div>
+    <button class="tlw-ok-btn" id="tlwOkBtn">Theek Hai, Samajh Gaya! 👍</button>
   </div>
 </div>
 
@@ -787,6 +827,21 @@
     inp.onkeydown = e => { if(e.key==='Enter') doDelete(); };
   }
 
+  // ✅ NEW: Show warning popup when tab has locked bookmarks (blocks delete)
+  function showTabLockedWarning(lockedBookmarks) {
+    const modal = document.getElementById('tabLockedWarningModal');
+    const countEl = document.getElementById('tlwLockedCount');
+    const listEl = document.getElementById('tlwLockedList');
+
+    countEl.textContent = lockedBookmarks.length;
+    listEl.innerHTML = lockedBookmarks.map(bm =>
+      `<div class="tlw-bm-item"><span class="material-icons">lock</span> ${bm.name}</div>`
+    ).join('');
+
+    modal.classList.add('show');
+    document.getElementById('tlwOkBtn').onclick = () => modal.classList.remove('show');
+  }
+
   function openTabMenu(tabId, x, y) {
     const menu = document.getElementById('tabContextMenu');
     const t = appData.tabs.find(x=>x.id===tabId);
@@ -808,6 +863,13 @@
         }
       }},
       { icon:'delete', label:'Delete Tab', danger:true, fn:()=>{
+        // ✅ NEW: Check for locked bookmarks before allowing tab delete
+        const lockedBms = t.bookmarks.filter(b => !!b.bmPassword);
+        if(lockedBms.length > 0) {
+          showTabLockedWarning(lockedBms);
+          return;
+        }
+
         if(!confirm(`"${t.name}" tab delete karen?`))return;
         if(t.password){ const pw=prompt('Password dalein:'); if(pw===null)return; if(btoa(pw)!==t.password){alert('❌ Wrong password!');return;} }
         appData.tabs=appData.tabs.filter(x=>x.id!==tabId);
